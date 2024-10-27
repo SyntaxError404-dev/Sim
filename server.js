@@ -1,20 +1,18 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-
 const app = express();
 const port = 3000;
 
 app.use(cors());
-app.use(express.json());
 
 // Endpoint for teaching
-app.post('/teach', async (req, res) => {
+app.get('/teach', async (req, res) => {
   try {
-    const { ask, ans } = req.body; // Change to req.body for POST requests
+    const { ask, ans } = req.query;
 
     if (!ask || !ans) {
-      return res.status(400).json({ error: 'Both ask and ans fields are required' });
+      return res.status(400).json({ error: 'Both ask and ans parameters are required' });
     }
 
     const response = await axios.get(`https://www.x-noobs-api.000.pe/teach?ask=${encodeURIComponent(ask)}&ans=${encodeURIComponent(ans)}`);
@@ -22,17 +20,17 @@ app.post('/teach', async (req, res) => {
 
   } catch (error) {
     console.error('Error in teaching API:', error);
-    res.status(500).json({ error: 'Internal server error while processing the teach request' });
+    res.status(500).json({ error: 'Error in teaching API' });
   }
 });
 
 // Endpoint for chatting
-app.post('/chat', async (req, res) => {
+app.get('/chat', async (req, res) => {
   try {
-    const { ask } = req.body; // Change to req.body for POST requests
+    const { ask } = req.query;
 
     if (!ask) {
-      return res.status(400).json({ error: 'Ask field is required' });
+      return res.status(400).json({ error: 'Ask parameter is required' });
     }
 
     const response = await axios.get(`https://www.x-noobs-api.000.pe/sim?ask=${encodeURIComponent(ask)}`);
@@ -40,10 +38,11 @@ app.post('/chat', async (req, res) => {
 
   } catch (error) {
     console.error('Error in chatting API:', error);
-    res.status(500).json({ error: 'Internal server error while processing the chat request' });
+    res.status(500).json({ error: 'Error in chatting API' });
   }
 });
 
 app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}. Made With ⚡ By NZR`);
+  console.log(`Server listening at http://localhost:${port} Made With ⚡ By NZR`);
 });
+

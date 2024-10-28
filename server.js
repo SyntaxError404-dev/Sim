@@ -1,48 +1,39 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+
 const app = express();
-const port = 3000;
+const PORT = 3000;
 
 app.use(cors());
+app.use(express.json());
 
-// Endpoint for teaching
-app.get('/teach', async (req, res) => {
+app.post('/teach', async (req, res) => {
+  const { ask, ans } = req.body;
+  const teachUrl = `https://www.x-noobs-api.000.pe/teach?ask=${encodeURIComponent(ask)}&ans=${encodeURIComponent(ans)}`;
+
   try {
-    const { ask, ans } = req.query;
-
-    if (!ask || !ans) {
-      return res.status(400).json({ error: 'Both ask and ans parameters are required' });
-    }
-
-    const response = await axios.get(`https://www.x-noobs-api.000.pe/teach?ask=${encodeURIComponent(ask)}&ans=${encodeURIComponent(ans)}`);
-    res.json(response.data);
-
+    const response = await axios.get(teachUrl);
+    res.send(response.data);
   } catch (error) {
-    console.error('Error in teaching API:', error);
-    res.status(500).json({ error: 'Error in teaching API' });
+    console.error('Error with teach API:', error.message);
+    res.status(500).send('Error connecting to teach API');
   }
 });
 
-// Endpoint for chatting
-app.get('/chat', async (req, res) => {
+app.post('/chat', async (req, res) => {
+  const { ask } = req.body;
+  const chatUrl = `https://www.x-noobs-api.000.pe/sim?ask=${encodeURIComponent(ask)}`;
+
   try {
-    const { ask } = req.query;
-
-    if (!ask) {
-      return res.status(400).json({ error: 'Ask parameter is required' });
-    }
-
-    const response = await axios.get(`https://www.x-noobs-api.000.pe/sim?ask=${encodeURIComponent(ask)}`);
-    res.json(response.data);
-
+    const response = await axios.get(chatUrl);
+    res.send(response.data);
   } catch (error) {
-    console.error('Error in chatting API:', error);
-    res.status(500).json({ error: 'Error in chatting API' });
+    console.error('Error with chat API:', error.message);
+    res.status(500).send('Error connecting to chat API');
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port} Made With ⚡ By NZR`);
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
-

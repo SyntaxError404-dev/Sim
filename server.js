@@ -1,36 +1,34 @@
 const express = require('express');
-const cors = require('cors');
 const axios = require('axios');
 
 const app = express();
 const PORT = 3000;
 
-app.use(cors());
 app.use(express.json());
 
-app.post('/teach', async (req, res) => {
-  const { ask, ans } = req.body;
-  const teachUrl = `https://www.x-noobs-api.000.pe/teach?ask=${encodeURIComponent(ask)}&ans=${encodeURIComponent(ans)}`;
-
+// Teaching endpoint, returns only the external API's response text
+app.get('/teach', async (req, res) => {
   try {
-    const response = await axios.get(teachUrl);
-    res.send(response.data);
+    const { ask, ans } = req.query;
+    const apiUrl = `https://www.x-noobs-api.000.pe/teach?ask=${encodeURIComponent(ask)}&ans=${encodeURIComponent(ans)}`;
+    
+    const response = await axios.get(apiUrl);
+    res.send(response.data); // Sends only the raw text response
   } catch (error) {
-    console.error('Error with teach API:', error.message);
-    res.status(500).send('Error connecting to teach API');
+    res.status(500).send('Error teaching the AI'); // Sends minimal error text
   }
 });
 
-app.post('/chat', async (req, res) => {
-  const { ask } = req.body;
-  const chatUrl = `https://www.x-noobs-api.000.pe/sim?ask=${encodeURIComponent(ask)}`;
-
+// Chatting endpoint, returns only the external API's response text
+app.get('/chat', async (req, res) => {
   try {
-    const response = await axios.get(chatUrl);
-    res.send(response.data);
+    const { ask } = req.query;
+    const apiUrl = `https://www.x-noobs-api.000.pe/sim?ask=${encodeURIComponent(ask)}`;
+    
+    const response = await axios.get(apiUrl);
+    res.send(response.data); // Sends only the raw text response
   } catch (error) {
-    console.error('Error with chat API:', error.message);
-    res.status(500).send('Error connecting to chat API');
+    res.status(500).send('Error chatting with the AI'); // Sends minimal error text
   }
 });
 

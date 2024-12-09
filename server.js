@@ -6,30 +6,30 @@ const PORT = 3000;
 
 app.use(express.json());
 
-// Teaching endpoint, returns only the external API's response text
-app.get('/teach', async (req, res) => {
-  try {
-    const { ask, ans } = req.query;
-    const apiUrl = `https://www.x-noobs-api.000.pe/teach?ask=${encodeURIComponent(ask)}&ans=${encodeURIComponent(ans)}`;
-    
-    const response = await axios.get(apiUrl);
-    res.send(response.data); // Sends only the raw text response
-  } catch (error) {
-    res.status(500).send('Error teaching the AI'); // Sends minimal error text
-  }
+const teachings = {};
+
+app.get('/teach', (req, res) => {
+  const { ask, ans } = req.query;
+  if (!ask || !ans) return res.status(400).send('Invalid input.');
+
+  const answers = teachings[ask] || [];
+  teachings[ask] = [...answers, ans];
+  res.send('Question and answer added successfully.');
 });
 
-// Chatting endpoint, returns only the external API's response text
-app.get('/chat', async (req, res) => {
-  try {
-    const { ask } = req.query;
-    const apiUrl = `https://www.x-noobs-api.000.pe/sim?ask=${encodeURIComponent(ask)}`;
-    
-    const response = await axios.get(apiUrl);
-    res.send(response.data); // Sends only the raw text response
-  } catch (error) {
-    res.status(500).send('Error chatting with the AI'); // Sends minimal error text
+app.get('/chat', (req, res) => {
+  const { ask } = req.query;
+  if (!ask) return res.status(400).send('Invalid input.');
+
+  if (teachings[ask]) {
+    const randomAnswer = teachings[ask][Math.floor(Math.random() * teachings[ask].length)];
+    return res.send(randomAnswer);
   }
+
+  axios
+    .get(`https://www.x-noobs-api.000.pe/sim?ask=${encodeURIComponent(ask)}`)
+    .then(response => res.send(response.data))
+    .catch(() => res.status(500).send('Error chatting with the AI.'));
 });
 
 app.listen(PORT, () => {
